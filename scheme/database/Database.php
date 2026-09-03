@@ -268,16 +268,17 @@ class Database {
             PDO::ATTR_EMULATE_PREPARES   => false,
         );
 
-        if ($driver === 'mysql' && !empty($database_config['ssl_ca'])) {
-            $ssl_ca = $database_config['ssl_ca'];
-            if (!is_file($ssl_ca)) {
-                throw new PDOException("MySQL SSL CA file not found: {$ssl_ca}");
+        if ($driver === 'mysql' && array_key_exists('ssl_verify', $database_config)) {
+            $ssl_ca = $database_config['ssl_ca'] ?? '';
+            if ($ssl_ca !== '') {
+                if (!is_file($ssl_ca)) {
+                    throw new PDOException("MySQL SSL CA file not found: {$ssl_ca}");
+                }
+
+                $options[PDO::MYSQL_ATTR_SSL_CA] = $ssl_ca;
             }
 
-            $options[PDO::MYSQL_ATTR_SSL_CA] = $ssl_ca;
-            if (array_key_exists('ssl_verify', $database_config)) {
-                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = (bool) $database_config['ssl_verify'];
-            }
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = (bool) $database_config['ssl_verify'];
         }
 
         try {

@@ -5,6 +5,11 @@ $ssl_ca = getenv('DB_SSL_CA') ?: '';
 if ($ssl_ca !== '' && !preg_match('/^(?:[A-Za-z]:[\\\\\/]|[\\\\\/])/', $ssl_ca)) {
     $ssl_ca = ROOT_DIR . ltrim($ssl_ca, '\\/');
 }
+$ssl_verify = getenv('DB_SSL_VERIFY') === '1';
+if ($ssl_ca !== '' && !is_file($ssl_ca)) {
+    $ssl_ca = '';
+    $ssl_verify = false;
+}
 
 $database['main'] = array(
     'driver'    => 'mysql',
@@ -17,5 +22,5 @@ $database['main'] = array(
     'dbprefix'  => '',
     'path'      => '',
     'ssl_ca'    => $ssl_ca,
-    'ssl_verify' => getenv('DB_SSL_VERIFY') === '1'
+    'ssl_verify' => $ssl_verify
 );
